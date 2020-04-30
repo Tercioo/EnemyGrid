@@ -424,10 +424,10 @@ function EnemyGrid:LoadSettingsPreset (presetIndex)
 	if (preset) then
 		--reseta a config
 		DF.table.copy (currentProfile, default_config.profile)
-		--aplica as definições
+		--aplica as definiï¿½ï¿½es
 		DF.table.copy (currentProfile, preset)
 		
-		--da refresh no painel de opção se ele estiver aberto
+		--da refresh no painel de opï¿½ï¿½o se ele estiver aberto
 		if (EnemyGridOptionsPanelFrameFrontPageFrame) then
 			EnemyGridOptionsPanelFrameFrontPageFrame:RefreshOptions()
 			EnemyGridOptionsPanelFrameAuraFrame:RefreshOptions()
@@ -711,7 +711,7 @@ local namePlateOnEvent = function (self, event, ...)
 					end
 				end
 				
-				--esconde os frames não usados
+				--esconde os frames nï¿½o usados
 				for i = auraIndex, #self.debuffAnchor.buffList do
 					self.debuffAnchor.buffList [i]:Hide()
 				end
@@ -742,7 +742,7 @@ local namePlateOnEvent = function (self, event, ...)
 				end
 			end
 			
-			--esconde os frames não usados
+			--esconde os frames nï¿½o usados
 			for i = auraIndex, #self.debuffAnchor.buffList do
 				self.debuffAnchor.buffList [i]:Hide()
 			end
@@ -1205,7 +1205,7 @@ function EnemyGrid.CanShow (entering_combat)
 	local can_show = true
 	
 	if (InCombatLockdown() or not EnemyGrid.CurrentSpec) then
-		--não pode alternar a visibilidade se estiver em combate ou se nao tiver a spec ainda
+		--nï¿½o pode alternar a visibilidade se estiver em combate ou se nao tiver a spec ainda
 		if (not EnemyGrid.CurrentSpec) then
 			EnemyGrid.GetCurrentSpec()
 		end
@@ -1560,7 +1560,7 @@ function EnemyGrid.OnInit()
 		DF:CreateAnimation (healthCutOffShowAnimation, "Alpha", 2, .2, 1, .5)
 		healthCutOff.ShowAnimation = healthCutOffShowAnimation
 		
-		--icone de identificação
+		--icone de identificaï¿½ï¿½o
 		local iconIndicator = overlayFrame:CreateTexture (nil, "overlay")
 		button.iconIndicator = iconIndicator
 		
@@ -1700,15 +1700,15 @@ function EnemyGrid.OnInit()
 		local isTanking, threatStatus = UnitDetailedThreatSituation ("player", self.unit)
 		
 		if (IsPlayerEffectivelyTank()) then
-			--se o jogador é TANK
+			--se o jogador ï¿½ TANK
 			if (not isTanking) then
 				if (UnitAffectingCombat (self.unit)) then
-					--não há aggro neste mob mas ele esta participando do combate
+					--nï¿½o hï¿½ aggro neste mob mas ele esta participando do combate
 					EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.tank.colors.noaggro))
 				else
-					--náo ha aggro e ele não esta participando do combate
+					--nï¿½o ha aggro e ele nï¿½o esta participando do combate
 					if (self.reaction == 4) then
-						--o mob é um npc neutro, apenas colorir com a cor neutra
+						--o mob ï¿½ um npc neutro, apenas colorir com a cor neutra
 						EnemyGrid.ForceChangeHealthBarColor (self, 1, 1, 0)
 					else
 						EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.tank.colors.nocombat))
@@ -1717,17 +1717,17 @@ function EnemyGrid.OnInit()
 				end
 			else
 				--o jogador esta tankando e:
-				if (threatStatus == 3) then --esta tankando com segurança
+				if (threatStatus == 3) then --esta tankando com seguranï¿½a
 					EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.tank.colors.aggro))
-				elseif (threatStatus == 2) then --esta tankando sem segurança
+				elseif (threatStatus == 2) then --esta tankando sem seguranï¿½a
 					EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.tank.colors.pulling))
-				else --não esta tankando
+				else --nï¿½o esta tankando
 					EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.tank.colors.noaggro))
 				end
 			end
 
 		else
-			--o player é DPS
+			--o player ï¿½ DPS
 			if (isTanking) then
 				--o jogador esta tankando como dps
 				EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.dps.colors.aggro))
@@ -1748,7 +1748,7 @@ function EnemyGrid.OnInit()
 				elseif (threatStatus == 1) then --esta quase puxando o aggro
 					EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.dps.colors.pulling))
 					self:GetParent().playerHasAggro = false
-				elseif (threatStatus == 0) then --não esta tanando
+				elseif (threatStatus == 0) then --nï¿½o esta tanando
 					EnemyGrid.ForceChangeHealthBarColor (self, unpack (EnemyGrid.db.profile.dps.colors.noaggro))
 					self:GetParent().playerHasAggro = false
 					
@@ -1838,7 +1838,7 @@ function EnemyGrid.OnInit()
 			unitFrame.reaction = reaction
 
 			if (UnitIsPlayer (plateID)) then
-				--é um jogador
+				--ï¿½ um jogador
 				if (reaction > 4) then
 					--jogador amigo, apenas trocar a cor da barra
 					unitFrame.actorType = ACTORTYPE_FRIENDLY_PLAYER
@@ -1878,7 +1878,7 @@ function EnemyGrid.OnInit()
 				else
 					unitFrame.actorType = ACTORTYPE_ENEMY_NPC
 
-					--verifica se é um npc de quest
+					--verifica se ï¿½ um npc de quest
 					if (EnemyGrid.db.profile.quest_enabled) then
 						local isQuestMob = EnemyGrid.IsQuestObjective (unitFrame)
 						if (isQuestMob and not IsTapDenied (unitFrame)) then
@@ -2008,7 +2008,7 @@ function EnemyGrid.OnInit()
 		EnemyGrid.CombatTime = GetTime()
 		EnemyGrid.RegenIsDisabled = true
 		
-		--verifica se o painel de opções esta aberto
+		--verifica se o painel de opï¿½ï¿½es esta aberto
 		if (EnemyGridOptionsPanelFrame and EnemyGridOptionsPanelFrame:IsShown()) then
 			EnemyGrid.ShouldReopenOptions = true
 			--EnemyGridOptionsPanelFrame:Hide()
@@ -2185,7 +2185,7 @@ function EnemyGrid.UpdateKeyBinds()
 		local bind = bindingList [i]
 		local bindType
 		
-		--botão a ser precionado
+		--botï¿½o a ser precionado
 		if (bind.key:find ("type")) then
 			local keyNumber = tonumber (bind.key:match ("%d"))
 			bindType = keyNumber
@@ -2387,13 +2387,13 @@ function EnemyGrid.UpdateGrid() --~update
 				unitFrame:ClearAllPoints()
 
 				if (jumpToNext) then
-					if (not firstFrame) then --é o primeiro frame a ser anexado 
+					if (not firstFrame) then --ï¿½ o primeiro frame a ser anexado 
 						if (EnemyGrid.db.profile.grow_direction == 1) then
 							unitFrame:SetPoint ("topleft", EnemyGrid.ScreenPanel, "topleft", 0, startY)
 						else
 							unitFrame:SetPoint ("bottomleft", EnemyGrid.ScreenPanel, "bottomleft", 0, -startY)
 						end
-					else --anexa ao frame que foi cabeçalho na ultima coluna
+					else --anexa ao frame que foi cabeï¿½alho na ultima coluna
 						unitFrame:SetPoint ("topleft", firstFrame, "topright", gapX, 0)
 					end
 					firstFrame = unitFrame
@@ -2425,7 +2425,7 @@ function EnemyGrid.UpdateGrid() --~update
 			unitFrame.raidMarker:SetSize (barHeight, barHeight)
 			unitFrame.raidMarker:SetAlpha (EnemyGrid.db.profile.raidmarker_alpha)
 			EnemyGrid.SetAnchor (unitFrame.raidMarker, EnemyGrid.db.profile.raidmarker_anchor)
-		--atualiza o icone de identificação
+		--atualiza o icone de identificaï¿½ï¿½o
 			unitFrame.iconIndicator:SetSize (barHeight*0.8, barHeight*0.8)
 			unitFrame.iconIndicator:SetAlpha (EnemyGrid.db.profile.iconIndicator_alpha)
 			EnemyGrid.SetAnchor (unitFrame.iconIndicator, EnemyGrid.db.profile.iconIndicator_anchor)
@@ -2572,28 +2572,35 @@ function EnemyGrid.IsQuestObjective (unitFrame)
 	GameTooltipScanQuest:SetHyperlink ("unit:" .. unitFrame.guid)
 	
 	for i = 1, 8 do
-		local text = ScanQuestTextCache [i]:GetText()
-		if (EnemyGrid.QuestCache [text]) then
-			--este npc percente a uma quest
-			if (not IsInGroup() and i < 8) then
-				--verifica se já fechou a quantidade necessária pra esse npc
-				local nextLineText = ScanQuestTextCache [i+1]:GetText()
-				if (nextLineText) then
-					local p1, p2 = nextLineText:match ("(%d%d)/(%d%d)") --^ - 
-					if (not p1) then
-						p1, p2 = nextLineText:match ("(%d)/(%d%d)")
-						if (not p1) then
-							p1, p2 = nextLineText:match ("(%d)/(%d)")
+		local scanText = ScanQuestTextCache[i]
+		if (scanText) then
+			local text = scanText:GetText()
+			if (EnemyGrid.QuestCache [text]) then
+				
+				--este npc percente a uma quest
+				if (not IsInGroup() and i < 8) then
+					--verifica se jï¿½ fechou a quantidade necessï¿½ria pra esse npc
+					local scanText2 = ScanQuestTextCache[i+1]
+					if (scanText2) then
+						local nextLineText = scanText2:GetText()
+						if (nextLineText) then
+							local p1, p2 = nextLineText:match ("(%d%d)/(%d%d)") --^ - 
+							if (not p1) then
+								p1, p2 = nextLineText:match ("(%d)/(%d%d)")
+								if (not p1) then
+									p1, p2 = nextLineText:match ("(%d)/(%d)")
+								end
+							end
+							if (p1 and p2 and p1 == p2) then
+								return
+							end
 						end
 					end
-					if (p1 and p2 and p1 == p2) then
-						return
-					end
 				end
-			end
 
-			unitFrame.quest = true
-			return true
+				unitFrame.quest = true
+				return true
+			end
 		end
 	end
 end
@@ -2764,7 +2771,7 @@ function EnemyGrid.OpenOptionsPanel()
 		button_text_size = 10,
 	}
 	
-	-- mainFrame é um frame vazio para sustentrar todos os demais frames, este frame sempre será mostrado
+	-- mainFrame ï¿½ um frame vazio para sustentrar todos os demais frames, este frame sempre serï¿½ mostrado
 	local mainFrame = DF:CreateTabContainer (f, "Enemy Grid", "EnemyGridOptionsPanelContainer", {
 		{name = "FrontPage", title = L["S_MENU_MAINPANEL"]},
 		{name = "BarsConfigPage", title = L["S_MENU_BARSCONFIG"]},
@@ -3059,7 +3066,7 @@ function EnemyGrid.OpenOptionsPanel()
 			get = function() return EnemyGrid.db.profile.frame_range_alpha end,
 			set = function (self, fixedparam, value) 
 				EnemyGrid.db.profile.frame_range_alpha = value
-				--o range é calculado a cada tick então não precisa chamar atualização
+				--o range ï¿½ calculado a cada tick entï¿½o nï¿½o precisa chamar atualizaï¿½ï¿½o
 			end,
 			min = 0,
 			max = 1,
@@ -3969,7 +3976,7 @@ function EnemyGrid.OpenOptionsPanel()
 	
 	
 	
-	--botões para selecionar a spec
+	--botï¿½es para selecionar a spec
 	local spec1 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec1 Placeholder Text", 1, _, _, "SpecButton1", _, 0, options_button_template, options_text_template)
 	local spec2 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec2 Placeholder Text", 1, _, _, "SpecButton2", _, 0, options_button_template, options_text_template)
 	local spec3 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec3 Placeholder Text", 1, _, _, "SpecButton3", _, 0, options_button_template, options_text_template)

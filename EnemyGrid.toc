@@ -1,4 +1,4 @@
-## Interface: 80200
+## Interface: 80300
 ## Title: Enemy Grid
 ## Notes: Creates a Grid with enemies near you
 ## SavedVariables: EnemyGridDB
