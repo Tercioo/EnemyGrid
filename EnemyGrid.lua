@@ -2672,12 +2672,9 @@ function EnemyGrid:UNIT_QUEST_LOG_CHANGED()
 end
 
 --------------------
-
 SLASH_ENEMYGRID1 = "/enemygrid"
 
-
 function SlashCmdList.ENEMYGRID (msg, editbox)
-	
 	if (msg == "resetpos") then
 		if (not InCombatLockdown()) then
 			EnemyGrid.ScreenPanel:ClearAllPoints()
@@ -2690,58 +2687,8 @@ function SlashCmdList.ENEMYGRID (msg, editbox)
 			return
 		end
 	end
-
 	EnemyGrid.OpenOptionsPanel()
-	
-	
-	
 end
-
-local ignoredKeys = {
-	["LSHIFT"] = true,
-	["RSHIFT"] = true,
-	["LCTRL"] = true,
-	["RCTRL"] = true,
-	["LALT"] = true,
-	["RALT"] = true,
-	["UNKNOWN"] = true,
-}
-local mouseKeys = {
-	["LeftButton"] = "type1",
-	["RightButton"] = "type2",
-	["MiddleButton"] = "type3",
-	["Button4"] = "type4",
-	["Button5"] = "type5",
-	["Button6"] = "type6",
-	["Button7"] = "type7",
-	["Button8"] = "type8",
-	["Button9"] = "type9",
-	["Button10"] = "type10",
-	["Button11"] = "type11",
-	["Button12"] = "type12",
-	["Button13"] = "type13",
-	["Button14"] = "type14",
-	["Button15"] = "type15",
-	["Button16"] = "type16",
-}
-local keysToMouse = {
-	["type1"] = "LeftButton",
-	["type2"] = "RightButton",
-	["type3"] = "MiddleButton",
-	["type4"] = "Button4",
-	["type5"] = "Button5",
-	["type6"] = "Button6",
-	["type7"] = "Button7",
-	["type8"] = "Button8",
-	["type9"] = "Button9",
-	["type10"] = "Button10",
-	["type11"] = "Button11",
-	["type12"] = "Button12",
-	["type13"] = "Button13",
-	["type14"] = "Button14",
-	["type15"] = "Button15",
-	["type16"] = "Button16",
-}
 
 -- ~options
 function EnemyGrid.OpenOptionsPanel()
@@ -2776,7 +2723,6 @@ function EnemyGrid.OpenOptionsPanel()
 		{name = "FrontPage", title = L["S_MENU_MAINPANEL"]},
 		{name = "BarsConfigPage", title = L["S_MENU_BARSCONFIG"]},
 		{name = "AurasPage", title = L["S_MENU_DEBUFFCONFIG"]},
-		{name = "KeybindsPage", title = L["S_MENU_KEYBINDS"]},
 		{name = "ProfilePage", title = L["S_PROFILES"]},
 	}, 
 	frame_options)
@@ -2784,8 +2730,7 @@ function EnemyGrid.OpenOptionsPanel()
 	local frontPageFrame = mainFrame.AllFrames [1]
 	local healAndCastBarsFrame = mainFrame.AllFrames [2]
 	local auraFrame = mainFrame.AllFrames [3]
-	local keybindFrame = mainFrame.AllFrames [4]
-	local profileFrame = mainFrame.AllFrames [5]
+	local profileFrame = mainFrame.AllFrames [4]
 
 	--> on profile change
 	function f.RefreshOptionsFrame()
@@ -2799,7 +2744,11 @@ function EnemyGrid.OpenOptionsPanel()
 	
 	--mostra o painel de profiles no menu de interface
 	profileFrame:SetScript ("OnShow", function()
+
 		EnemyGrid:OpenInterfaceProfile()
+		InterfaceOptionsFrameTab2:Click()
+		EnemyGrid:OpenInterfaceProfile()
+
 		f:Hide()
 		C_Timer.After (.5, function()
 			mainFrame:SetIndex (1)
@@ -3930,393 +3879,8 @@ function EnemyGrid.OpenOptionsPanel()
 	}
 
 	DF:BuildMenu (healAndCastBarsFrame, options_table, mainStartX, mainStartY, mainHeightSize + 40, true, options_text_template, options_dropdown_template, options_switch_template, true, options_slider_template, options_button_template)	
-
---------------------------------
---> keybind frame ~key
 	
-	local SCROLL_ROLL_AMOUNT = 12
-	
-	--frame para setar a keybind
-	local keyBindListener = CreateFrame ("frame", "EnemyGridOptionsPanelKeyBindListenerFrame", keybindFrame)
-	keyBindListener.IsListening = false
-	keyBindListener.EditingSpec = EnemyGrid.CurrentSpec
-	keyBindListener.CurrentKeybindEditingSet = EnemyGrid.CurrentKeybindSet
-	
-	local allSpecButtons = {}
-	local switch_spec = function (self, button, specID)
-		keyBindListener.EditingSpec = specID
-		keyBindListener.CurrentKeybindEditingSet = EnemyGridDBChr.KeyBinds [specID]
-		
-		for _, button in ipairs (allSpecButtons) do
-			button.selectedTexture:Hide()
-		end
-		self.MyObject.selectedTexture:Show()
-		
-		--feedback ao jogador uma vez que as keybinds podem ter o mesmo valor
-		C_Timer.After (.04, function() EnemyGridOptionsPanelFrameKeybindScroill:Hide() end)
-		C_Timer.After (.06, function() EnemyGridOptionsPanelFrameKeybindScroill:Show() end)
-		
-		--atualiza a scroll
-		EnemyGridOptionsPanelFrameKeybindScroill:UpdateScroll()
-	end
-	
-	local inactiveFrame = CreateFrame ("frame", nil, keybindFrame)
-	inactiveFrame:SetAllPoints()
-	inactiveFrame:EnableMouse (true)
-	inactiveFrame:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16, edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1})
-	inactiveFrame:SetBackdropColor (0, 0, 0, 1)
-	inactiveFrame:SetBackdropBorderColor (1, 1, 1, 0)
-	inactiveFrame:SetFrameLevel (keybindFrame:GetFrameLevel()+10)
-	
-	--7.1_warning
-	local warning_7_1_patch = DF:CreateLabel (inactiveFrame, "Keybinds won't work anymore since 7.1 patch")
-	warning_7_1_patch:SetPoint (450, -150)
-	warning_7_1_patch.textcolor = "red"
-	warning_7_1_patch.textsize = 16
-	
-	
-	
-	--bot�es para selecionar a spec
-	local spec1 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec1 Placeholder Text", 1, _, _, "SpecButton1", _, 0, options_button_template, options_text_template)
-	local spec2 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec2 Placeholder Text", 1, _, _, "SpecButton2", _, 0, options_button_template, options_text_template)
-	local spec3 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec3 Placeholder Text", 1, _, _, "SpecButton3", _, 0, options_button_template, options_text_template)
-	local spec4 = DF:CreateButton (keybindFrame, switch_spec, 160, 20, "Spec4 Placeholder Text", 1, _, _, "SpecButton4", _, 0, options_button_template, options_text_template)
-	
-	local className, class = UnitClass ("player")
-	local i = 1
-	for specID, _ in pairs (defaultSpecKeybindList [class]) do
-		local button = keybindFrame ["SpecButton" .. i]
-		local spec_id, spec_name, spec_description, spec_icon, spec_background, spec_role, spec_class = GetSpecializationInfoByID (specID)
-		button.text = spec_name
-		button:SetClickFunction (switch_spec, specID)
-		button:SetIcon (spec_icon)
-		button.specID = spec_id
-		
-		local selectedTexture = button:CreateTexture (nil, "background")
-		selectedTexture:SetAllPoints()
-		selectedTexture:SetColorTexture (1, 1, 1, 0.5)
-		if (spec_id ~= keyBindListener.EditingSpec) then
-			selectedTexture:Hide()
-		end
-		button.selectedTexture = selectedTexture
-		
-		tinsert (allSpecButtons, button)
-		i = i + 1
-	end
-	
-	local specsTitle = DF:CreateLabel (keybindFrame, "Config keys for spec:", 12, "silver")
-	specsTitle:SetPoint ("topleft", keybindFrame, "topleft", 10, mainStartY)
-	
-	spec1:SetPoint ("topleft", specsTitle, "bottomleft", 0, -10)
-	spec2:SetPoint ("topleft", specsTitle, "bottomleft", 0, -30)
-	spec3:SetPoint ("topleft", specsTitle, "bottomleft", 0, -50)
-	if (class == "DRUID") then
-		spec4:SetPoint ("topleft", specsTitle, "bottomleft", 0, -70)
-	end
-	
-	local enter_the_key = CreateFrame ("frame", nil, keyBindListener)
-	enter_the_key:SetFrameStrata ("tooltip")
-	enter_the_key:SetSize (200, 60)
-	enter_the_key:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16, edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1})
-	enter_the_key:SetBackdropColor (0, 0, 0, 1)
-	enter_the_key:SetBackdropBorderColor (1, 1, 1, 1)
-	enter_the_key.text = DF:CreateLabel (enter_the_key, "- Press a keyboard key to bind.\n- Click to bind a mouse button.\n- Press escape to cancel.", 11, "orange")
-	enter_the_key.text:SetPoint ("center", enter_the_key, "center")
-	enter_the_key:Hide()
-	
-	local registerKeybind = function (self, key) 
-		if (ignoredKeys [key]) then
-			return
-		end
-		if (key == "ESCAPE") then
-			enter_the_key:Hide()
-			keyBindListener.IsListening = false
-			keyBindListener:SetScript ("OnKeyDown", nil)
-			return
-		end
-		
-		local bind = (IsShiftKeyDown() and "SHIFT-" or "") .. (IsControlKeyDown() and "CTRL-" or "") .. (IsAltKeyDown() and "ALT-" or "")
-		bind = bind .. key
-	
-		--adiciona para a tabela de keybinds
-		local keybind = keyBindListener.CurrentKeybindEditingSet [self.keybindIndex]
-		keybind.key = bind
-		
-		keyBindListener.IsListening = false
-		keyBindListener:SetScript ("OnKeyDown", nil)
-		
-		enter_the_key:Hide()
-		keybindFrame.keybindScroll:UpdateScroll()
-		EnemyGrid.UpdateKeyBinds()
-	end
-	
-	local set_keybind_key = function (self, button, keybindIndex)
-		if (keyBindListener.IsListening) then
-			key = mouseKeys [button] or button
-			return registerKeybind (keyBindListener, key)
-		end
-		keyBindListener.IsListening = true
-		keyBindListener.keybindIndex = keybindIndex
-		keyBindListener:SetScript ("OnKeyDown", registerKeybind)
-		
-		enter_the_key:Show()
-		enter_the_key:SetPoint ("bottom", self, "top")
-	end
-	
-	local new_key_bind = function (self, button, specID)
-		tinsert (keyBindListener.CurrentKeybindEditingSet, {key = "-none-", action = "_target", actiontext = ""})
-		FauxScrollFrame_SetOffset (keybindFrame.keybindScroll, max (#keyBindListener.CurrentKeybindEditingSet-SCROLL_ROLL_AMOUNT, 0))
-		keybindFrame.keybindScroll:UpdateScroll()
-	end	
-	
-	local set_action_text = function (keybindIndex, _, text)
-		local keybind = keyBindListener.CurrentKeybindEditingSet [keybindIndex]
-		keybind.actiontext = text
-		EnemyGrid.UpdateKeyBinds()
-	end
-	local set_action_on_espace_press = function (textentry, capsule)
-		capsule = capsule or textentry.MyObject
-		local keybind = keyBindListener.CurrentKeybindEditingSet [capsule.CurIndex]
-		textentry:SetText (keybind.actiontext)
-		EnemyGrid.UpdateKeyBinds()
-	end
-	
-	local lock_textentry = {
-		["_target"] = true,
-		["_taunt"] = true,
-		["_interrupt"] = true,
-		["_dispel"] = true,
-		["_spell"] = false,
-		["_macro"] = false,
-	}
-	
-	local change_key_action = function (self, keybindIndex, value)
-		local keybind = keyBindListener.CurrentKeybindEditingSet [keybindIndex]
-		keybind.action = value
-		keybindFrame.keybindScroll:UpdateScroll()
-		EnemyGrid.UpdateKeyBinds()
-	end
-	local fill_action_dropdown = function()
-	
-		local locClass, class = UnitClass ("player")
-		
-		local taunt = tauntList [class] and GetSpellInfo (tauntList [class]) or ""
-		local interrupt = interruptList [class] and GetSpellInfo (interruptList [class]) or ""
-		local dispel = dispelList [class]
-		
-		if (type (dispel) == "table") then
-			local dispelString = "\n"
-			for specID, spellid in pairs (dispel) do
-				local specid, specName = GetSpecializationInfoByID (specID)
-				local spellName = GetSpellInfo (spellid)
-				dispelString = dispelString .. "|cFFE5E5E5" .. specName .. "|r: |cFFFFFFFF" .. spellName .. "\n"
-			end
-			dispel = dispelString
-		else
-			dispel = GetSpellInfo (dispel) or ""
-		end
-		
-		return {
-			{value = "_target", label = "Target", onclick = change_key_action, desc = "Target the unit"},
-			{value = "_taunt", label = "Taunt", onclick = change_key_action, desc = "Cast the taunt spell for your class\n\n|cFFFFFFFFSpell: " .. taunt},
-			{value = "_interrupt", label = "Interrupt", onclick = change_key_action, desc = "Cast the interrupt spell for your class\n\n|cFFFFFFFFSpell: " .. interrupt},
-			{value = "_dispel", label = "Dispel", onclick = change_key_action, desc = "Cast the interrupt spell for your class\n\n|cFFFFFFFFSpell: " .. dispel},
-			{value = "_spell", label = "Cast Spell", onclick = change_key_action, desc = "Type the spell name in the text box"},
-			{value = "_macro", label = "Macro", onclick = change_key_action, desc = "Type your macro in the text box"},
-		}
-	end
-	
-	local copy_keybind = function (self, button, keybindIndex)
-		local keybind = keyBindListener.CurrentKeybindEditingSet [keybindIndex]
-		for specID, t in pairs (EnemyGridDBChr.KeyBinds) do
-			if (specID ~= keyBindListener.EditingSpec) then
-				local key = CopyTable (keybind)
-				local specid, specName = GetSpecializationInfoByID (specID)
-				tinsert (EnemyGridDBChr.KeyBinds [specID], key)
-				EnemyGrid:Msg ("Keybind copied to " .. specName)
-			end
-		end
-		EnemyGrid.UpdateKeyBinds()
-	end
-	
-	local delete_keybind = function (self, button, keybindIndex)
-		tremove (keyBindListener.CurrentKeybindEditingSet, keybindIndex)
-		keybindFrame.keybindScroll:UpdateScroll()
-		EnemyGrid.UpdateKeyBinds()
-	end
-	
-	local newTitle = DF:CreateLabel (keybindFrame, "Create a new Keybind:", 12, "silver")
-	newTitle:SetPoint ("topleft", keybindFrame, "topleft", 200, mainStartY)
-	local createNewKeybind = DF:CreateButton (keybindFrame, new_key_bind, 160, 20, "New Key Bind", 1, _, _, "NewKeybindButton", _, 0, options_button_template, options_text_template)
-	createNewKeybind:SetPoint ("topleft", newTitle, "bottomleft", 0, -10)
-	--createNewKeybind:SetIcon ([[Interface\Buttons\UI-GuildButton-PublicNote-Up]])
-
-	local update_keybind_list = function (self)
-		
-		local keybinds = keyBindListener.CurrentKeybindEditingSet
-		FauxScrollFrame_Update (self, #keybinds, SCROLL_ROLL_AMOUNT, 21)
-		local offset = FauxScrollFrame_GetOffset (self)
-		
-		for i = 1, SCROLL_ROLL_AMOUNT do
-			local index = i + offset
-			local f = self.Frames [i]
-			local data = keybinds [index]
-
-			if (data) then
-				--index
-				f.Index.text = index
-				--keybind
-				local keyBindText = keysToMouse [data.key] or data.key
-				
-				keyBindText = keyBindText:gsub ("type1", "LeftButton")
-				keyBindText = keyBindText:gsub ("type2", "RightButton")
-				keyBindText = keyBindText:gsub ("type3", "MiddleButton")
-				
-				f.KeyBind.text = keyBindText
-				f.KeyBind:SetClickFunction (set_keybind_key, index, nil, "left")
-				f.KeyBind:SetClickFunction (set_keybind_key, index, nil, "right")
-				--action
-				f.ActionDrop:SetFixedParameter (index)
-				f.ActionDrop:Select (data.action)
-				--action text
-				f.ActionText.text = data.actiontext
-				f.ActionText:SetEnterFunction (set_action_text, index)
-				f.ActionText.CurIndex = index
-				
-				if (lock_textentry [data.action]) then
-					f.ActionText:Disable()
-				else
-					f.ActionText:Enable()
-				end
-				
-				--copy
-				f.Copy:SetClickFunction (copy_keybind, index)
-				--delete
-				f.Delete:SetClickFunction (delete_keybind, index)
-				
-				f:Show()
-			else
-				f:Hide()
-			end
-		end
-		
-		self:Show()
-	end
-	
-	local keybindScroll = CreateFrame ("scrollframe", "EnemyGridOptionsPanelFrameKeybindScroill", keybindFrame, "FauxScrollFrameTemplate")
-	keybindScroll:SetPoint ("topleft", specsTitle.widget, "bottomleft", 0, -120)
-	keybindScroll:SetSize (1019, 348)
-	keybindScroll.Frames = {}
-	keybindFrame.keybindScroll = keybindScroll
-	
-	keybindScroll:SetScript ("OnVerticalScroll", function (self, offset)
-		FauxScrollFrame_OnVerticalScroll (self, offset, 21, update_keybind_list)
-	end)
-	keybindScroll.UpdateScroll = update_keybind_list
-	
-	local backdropColor = {.3, .3, .3, .3}
-	local backdropColorOnEnter = {.6, .6, .6, .6}
-	local on_enter = function (self)
-		self:SetBackdropColor (unpack (backdropColorOnEnter))
-	end
-	local on_leave = function (self)
-		self:SetBackdropColor (unpack (backdropColor))
-	end
-	
-	local font = "GameFontHighlightSmall"
-	
-	for i = 1, SCROLL_ROLL_AMOUNT do
-		local f = CreateFrame ("frame", "$KeyBindFrame" .. i, keybindScroll)
-		f:SetSize (1009, 20)
-		f:SetPoint ("topleft", keybindScroll, "topleft", 0, -(i-1)*29)
-		f:SetBackdrop ({bgFile = [[Interface\Tooltips\UI-Tooltip-Background]], tileSize = 64, tile = true})
-		f:SetBackdropColor (unpack (backdropColor))
-		f:SetScript ("OnEnter", on_enter)
-		f:SetScript ("OnLeave", on_leave)
-		tinsert (keybindScroll.Frames, f)
-		
-		f.Index = DF:CreateLabel (f, "1")
-		f.KeyBind = DF:CreateButton (f, set_key_bind, 100, 20, "", _, _, _, "SetNewKeybindButton", _, 0, options_button_template, options_text_template)
-		f.ActionDrop = DF:CreateDropDown (f, fill_action_dropdown, 0, 120, 20, "ActionDropdown", _, options_dropdown_template)
-		f.ActionText = DF:CreateTextEntry (f, function()end, 660, 20, "TextBox", _, _, options_dropdown_template)
-		f.Copy = DF:CreateButton (f, copy_keybind, 20, 20, "", _, _, _, "CopyKeybindButton", _, 0, options_button_template, options_text_template)
-		f.Delete = DF:CreateButton (f, delete_keybind, 16, 20, "", _, _, _, "DeleteKeybindButton", _, 2, options_button_template, options_text_template)
-		
-		f.Index:SetPoint ("left", f, "left", 10, 0)
-		f.KeyBind:SetPoint ("left", f, "left", 43, 0)
-		f.ActionDrop:SetPoint ("left", f, "left", 150, 0)
-		f.ActionText:SetPoint ("left", f, "left", 276, 0)
-		f.Copy:SetPoint ("left", f, "left", 950, 0)
-		f.Delete:SetPoint ("left", f, "left", 990, 0)
-		
-		f.Copy:SetIcon ([[Interface\Buttons\UI-GuildButton-PublicNote-Up]], nil, nil, nil, nil, nil, nil, 4)
-		f.Delete:SetIcon ([[Interface\Buttons\UI-StopButton]], nil, nil, nil, nil, nil, nil, 4)
-		
-		f.Copy.tooltip = "copy this keybind to other specs"
-		f.Delete.tooltip = "erase this keybind"
-		
-		--editbox
-		f.ActionText:SetJustifyH ("left")
-		f.ActionText:SetHook ("OnEscapePressed", set_action_on_espace_press)
-		f.ActionText:SetHook ("OnEditFocusGained", function()
-			local playerSpells = {}
-			local tab, tabTex, offset, numSpells = GetSpellTabInfo (2)
-			for i = 1, numSpells do
-				local index = offset + i
-				local spellType, spellId = GetSpellBookItemInfo (index, "player")
-				if (spellType == "SPELL") then
-					local spellName = GetSpellInfo (spellId)
-					tinsert (playerSpells, spellName)
-				end
-			end
-			f.ActionText.WordList = playerSpells
-		end)
-		
-		f.ActionText:SetAsAutoComplete ("WordList")
-	end
-	
-	local header = CreateFrame ("frame", "EnemyGridOptionsPanelFrameHeader", keybindScroll)
-	header:SetPoint ("bottomleft", keybindScroll, "topleft", 0, 2)
-	header:SetPoint ("bottomright", keybindScroll, "topright", 0, 2)
-	header:SetHeight (16)
-
-	header.Index = DF:CreateLabel  (header, "Index", DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	header.Key = DF:CreateLabel  (header, "Key", DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	header.Action = DF:CreateLabel  (header, "Action", DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	header.Macro = DF:CreateLabel  (header, "Spell Name / Macro", DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	header.Copy = DF:CreateLabel  (header, "Copy", DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	header.Delete = DF:CreateLabel  (header, "Delete", DF:GetTemplate ("font", "OPTIONS_FONT_TEMPLATE"))
-	
-	header.Index:SetPoint ("left", header, "left", 10, 0)
-	header.Key:SetPoint ("left", header, "left", 43, 0)
-	header.Action:SetPoint ("left", header, "left", 150, 0)
-	header.Macro:SetPoint ("left", header, "left", 276, 0)
-	header.Copy:SetPoint ("left", header, "left", 950, 0)
-	header.Delete:SetPoint ("left", header, "left", 990, 0)
-
-	keybindFrame:SetScript ("OnShow", function()
-		keyBindListener.EditingSpec = EnemyGrid.CurrentSpec
-		keyBindListener.CurrentKeybindEditingSet = EnemyGrid.CurrentKeybindSet
-		
-		for _, button in ipairs (allSpecButtons) do
-			if (keyBindListener.EditingSpec ~= button.specID) then
-				button.selectedTexture:Hide()
-			else
-				button.selectedTexture:Show()
-			end
-		end
-		
-		keybindScroll:UpdateScroll()
-	end)
-	
-	keybindFrame:SetScript ("OnHide", function()
-		if (keyBindListener.IsListening) then
-			keyBindListener.IsListening = false
-			keyBindListener:SetScript ("OnKeyDown", nil)
-		end
-	end)
-
-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 --> ~auras ~debuff ~buff
 --	local welcomestring = DF:CreateLabel (auraFrame, "Cast spells to fill *your* debuffs list.", 16, "white")
 --	welcomestring:SetPoint ("topleft", self, "topleft", 10, -210)
@@ -4331,7 +3895,17 @@ function EnemyGrid.OpenOptionsPanel()
 		width = 200,
 	}
 
-	local auraConfigPanel = DF:CreateAuraConfigPanel (auraFrame, "$parentAuraConfig", EnemyGrid.db.profile, _, aura_options) --method_change_callback
+	local debuff_panel_texts = {
+		BUFFS_AVAILABLE = "Click to add buffs to blacklist",
+		BUFFS_IGNORED = "Buffs on the blacklist (filtered out)",
+		DEBUFFS_AVAILABLE = "Click to add debuffs to blacklist",
+		DEBUFFS_IGNORED = "Debuffs on the blacklist (filtered out)",
+		BUFFS_TRACKED = "Additional buffs to track",
+		DEBUFFS_TRACKED = "Additional debuffs to track",
+		MANUAL_DESC = "Auras are being tracked manually, the addon only check for auras you entered below.\nShow debuffs only casted by you, buffs from any source.\nYou may use the 'Buff Special' tab to add debuffs from any source.",
+	}
+
+	local auraConfigPanel = DF:CreateAuraConfigPanel (auraFrame, "$parentAuraConfig", EnemyGrid.db.profile, _, aura_options, debuff_panel_texts) --method_change_callback
 	auraConfigPanel:SetPoint ("topleft", auraFrame, "topleft", 250, -100)
 	auraConfigPanel:SetSize (600, 600)
 	auraConfigPanel:Show()
