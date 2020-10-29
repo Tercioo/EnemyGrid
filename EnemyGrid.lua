@@ -587,7 +587,7 @@ end
 local AddAura = function (self, i, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId, isBuff)
 
 	if (not self.debuffAnchor.buffList [i]) then
-		self.debuffAnchor.buffList [i] = CreateFrame ("Frame", self:GetName() .. "Debuff" .. i, self.debuffAnchor, "NameplateBuffButtonTemplate")
+		self.debuffAnchor.buffList [i] = CreateFrame ("Frame", self:GetName() .. "Debuff" .. i, self.debuffAnchor, "NameplateBuffButtonTemplate, BackdropTemplate")
 		self.debuffAnchor.buffList [i]:SetMouseClickEnabled (false)
 		self.debuffAnchor.buffList [i]:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1})
 		self.debuffAnchor.buffList [i]:SetScript ("OnEnter", EnemyGrid_AuraOnEnter)
@@ -685,6 +685,10 @@ local namePlateOnEvent = function (self, event, ...)
 							AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId, true)
 							auraIndex = auraIndex + 1
 						end
+
+						if (not name) then
+							break
+						end
 					end
 					
 				elseif (self.actorType == ACTORTYPE_ENEMY_PLAYER) then
@@ -692,11 +696,17 @@ local namePlateOnEvent = function (self, event, ...)
 					local class = self.class or select (2, UnitClass (self.NamePlateId))
 					local spells = EnemyGrid.ClassBuffCache [class]
 					if (spells) then
-						for i = 1, #spells do
-							local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, spells[i])
+						for i = 1, BUFF_MAX_DISPLAY do
+							local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, i, "HELPFUL")
 							if (name) then
-								AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId, true)
-								auraIndex = auraIndex + 1
+								for o = 1, #spells do
+									if (spells[o] == name) then
+										AddAura(self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId, true)
+										auraIndex = auraIndex + 1
+									end
+								end
+							else
+								break
 							end
 						end
 					end
@@ -706,7 +716,7 @@ local namePlateOnEvent = function (self, event, ...)
 				for i = 1, BUFF_MAX_DISPLAY do
 					local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, i, "HARMFUL|PLAYER")
 					if (name and not debuff_banned [spellId]) then
-						AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId)
+						AddAura(self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId)
 						auraIndex = auraIndex + 1
 					end
 				end
@@ -722,23 +732,40 @@ local namePlateOnEvent = function (self, event, ...)
 			local debuffs = profile.aura_tracker.debuff
 			
 			local auraIndex = 1
-			
-			for i = 1, #debuffs do
-				local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, debuffs [i], nil, "HARMFUL|PLAYER")
+			for i = 1, BUFF_MAX_DISPLAY do
+				local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, i, "HARMFUL|PLAYER")
 				if (name) then
-					AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId)
-					auraIndex = auraIndex + 1
-				elseif (profile.aura_always_show_debuffs) then
-					AddAura (self, auraIndex, auraWidth, auraHeight, false)
-					auraIndex = auraIndex + 1
+					local found = false
+
+					for o = 1, #debuffs do
+						if (debuffs[o] == name) then
+							AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId)
+							auraIndex = auraIndex + 1
+							found = true
+							break
+						end
+					end
+
+					if (not found and profile.aura_always_show_debuffs) then
+						AddAura (self, auraIndex, auraWidth, auraHeight, false)
+						auraIndex = auraIndex + 1
+					end
+				else
+					break
 				end
 			end
-			
-			for i = 1, #buffs do
-				local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, buffs [i])
+
+			for i = 1, BUFF_MAX_DISPLAY do
+				local name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId = UnitAura (self.NamePlateId, i)
 				if (name) then
-					AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId, true)
-					auraIndex = auraIndex + 1
+					for o = 1, #buffs do
+						if (buffs[o] == name) then
+							AddAura (self, auraIndex, auraWidth, auraHeight, name, texture, count, debuffType, duration, expirationTime, caster, canStealOrPurge, nameplateShowPersonal, spellId, true)
+							auraIndex = auraIndex + 1
+						end
+					end
+				else
+					break
 				end
 			end
 			
@@ -1291,7 +1318,7 @@ function EnemyGrid.OnInit()
 	
 	C_Timer.After (10, function()
 		if (not EnemyGrid.db.profile.path_7_11_warning) then
-			local f = CreateFrame ("frame", nil, UIParent)
+			local f = CreateFrame ("frame", nil, UIParent, "BackdropTemplate")
 			f:SetSize (600, 300)
 			f:SetBackdrop ({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background", tile = true, tileSize = 16, edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1})
 			f:SetBackdropColor (0, 0, 0)
@@ -1313,7 +1340,7 @@ function EnemyGrid.OnInit()
 	end)	
 
 	--cria o painel principal
-	EnemyGrid.ScreenPanel = CreateFrame ("frame", "EnemyGrid_ScreenPanel39", UIParent)
+	EnemyGrid.ScreenPanel = CreateFrame ("frame", "EnemyGrid_ScreenPanel39", UIParent, "BackdropTemplate")
 	EnemyGrid.ScreenPanel:SetPoint ("center", UIParent, "center", -500, 200)
 
 	if (not EnemyGrid.db.profile.point) then
@@ -1382,10 +1409,6 @@ function EnemyGrid.OnInit()
 		end
 	end)
 	
-	--highlight para o alvo
-	--local highlightFrame = CreateFrame ("frame", "PlaterNameGrid_TargetHighlight", EnemyGrid.ScreenPanel)
-	--highlightFrame:SetFrameLevel (22)
-	
 	--cria os frames
 	EnemyGrid.unitFrameContainer = {}
 	EnemyGrid.unitFrameIDsContainer = {}
@@ -1402,7 +1425,7 @@ function EnemyGrid.OnInit()
 	local maxTargets = EnemyGrid.db.profile.max_targets
 	for i = 1, 40 do
 		-- ~create
-		local button = CreateFrame ("button", "EnemyGrid_UnitFrame" .. i, EnemyGrid.ScreenPanel, "SecureUnitButtonTemplate,SecureHandlerEnterLeaveTemplate,SecureHandlerShowHideTemplate")
+		local button = CreateFrame ("button", "EnemyGrid_UnitFrame" .. i, EnemyGrid.ScreenPanel, "SecureUnitButtonTemplate,SecureHandlerEnterLeaveTemplate,SecureHandlerShowHideTemplate, BackdropTemplate")
 		tinsert (EnemyGrid.unitFrameContainer, button)
 		button.NamePlateId = "nameplate" .. i
 		button.unit = "nameplate" .. i
@@ -1425,7 +1448,7 @@ function EnemyGrid.OnInit()
 		button:SetScript ("OnEvent", namePlateOnEvent)
 		
 		--health statusbar
-		local healthBar = CreateFrame ("statusbar", "EnemyGrid_UnitFrame" .. i .. "HealthBar", button)
+		local healthBar = CreateFrame ("statusbar", "EnemyGrid_UnitFrame" .. i .. "HealthBar", button, "BackdropTemplate")
 		healthBar:SetPoint ("topleft", 1, -1)
 		healthBar:SetPoint ("bottomright", -1, 1)
 		healthBar:SetAlpha (.1)
@@ -1454,7 +1477,7 @@ function EnemyGrid.OnInit()
 		button.playerName = playerName
 
 		--castbar
-		local castBar = CreateFrame ("statusbar", "EnemyGrid_UnitFrame" .. i .. "CastBar", button)
+		local castBar = CreateFrame ("statusbar", "EnemyGrid_UnitFrame" .. i .. "CastBar", button, "BackdropTemplate")
 		castBar:Hide()
 		castBar.NamePlateId = "nameplate" .. i
 		castBar.EnemyGrid = true
@@ -1511,7 +1534,7 @@ function EnemyGrid.OnInit()
 		debuffAnchor:SetSize (1, 1)
 		debuffAnchor.debuffFrameContainer = {}
 		
-		local overlayFrame = CreateFrame ("frame", "EnemyGrid_UnitFrame" .. i .. "Overlay", button)
+		local overlayFrame = CreateFrame ("frame", "EnemyGrid_UnitFrame" .. i .. "Overlay", button, "BackdropTemplate")
 		overlayFrame:SetAllPoints()
 		overlayFrame:SetFrameLevel (25)
 		overlayFrame:SetBackdrop ({edgeFile = [[Interface\Buttons\WHITE8X8]], edgeSize = 1})
@@ -1602,8 +1625,9 @@ function EnemyGrid.OnInit()
 			if (unitCast ~= self.unit) then
 				return
 			end
-			local name, nameSubtext, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo (unitCast)
-			self.Icon:SetTexture (texture)
+			local name, text, texture, startTime, endTime, isTradeSkill, castID, notInterruptible = UnitCastingInfo (unitCast)
+			self.Icon:SetTexture(texture)
+			self.Icon:SetTexCoord(.1, .9, .1, .9)
 			self.Icon:Show()
 			
 			if (notInterruptible) then
@@ -1617,8 +1641,9 @@ function EnemyGrid.OnInit()
 			if (unitCast ~= self.unit) then
 				return
 			end
-			local name, nameSubtext, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo (unitCast)
+			local name, text, texture, startTime, endTime, isTradeSkill, notInterruptible = UnitChannelInfo (unitCast)
 			self.Icon:SetTexture (texture)
+			self.Icon:SetTexCoord(.1, .9, .1, .9)
 			self.Icon:Show()
 			
 			if (notInterruptible) then
@@ -2511,7 +2536,7 @@ end
 
 function EnemyGrid.CreateAggroFlashFrame (unitFrame)
 
-	local f_anim = CreateFrame ("frame", nil, unitFrame)
+	local f_anim = CreateFrame ("frame", nil, unitFrame, "BackdropTemplate")
 	f_anim:SetFrameLevel (27)
 	f_anim:SetPoint ("topleft", unitFrame, "topleft")
 	f_anim:SetPoint ("bottomright", unitFrame, "bottomright")
@@ -2607,9 +2632,13 @@ end
 
 local update_quest_cache = function()
 	wipe (EnemyGrid.QuestCache)
-	local numEntries, numQuests = GetNumQuestLogEntries()
+	local numEntries, numQuests = C_QuestLog.GetNumQuestLogEntries()
 	for questId = 1, numEntries do
-		local title, level, suggestedGroup, isHeader, isCollapsed, isComplete, frequency, questId, startEvent, displayQuestID, isOnMap, hasLocalPOI, isTask, isStory = GetQuestLogTitle (questId)
+
+		local title = C_QuestLog.GetTitleForLogIndex(questId)
+		local questInfo = C_QuestLog.GetInfo(questId)
+		local questId = questInfo.questID
+
 		if (type (questId) == "number" and questId > 0) then -- and not isComplete
 			EnemyGrid.QuestCache [title] = true
 		end

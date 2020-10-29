@@ -429,6 +429,18 @@ local ButtonMetaFunctions = _G[DF.GlobalWidgetControlNames ["button"]]
 			return self.icon:GetTexture()
 		end
 	end
+
+	function ButtonMetaFunctions:SetBackdrop(...)
+		return self.button:SetBackdrop(...)
+	end
+
+	function ButtonMetaFunctions:SetBackdropColor(...)
+		return self.button:SetBackdropColor(...)
+	end
+
+	function ButtonMetaFunctions:SetBackdropBorderColor(...)
+		return self.button:SetBackdropBorderColor(...)
+	end
 	
 	function ButtonMetaFunctions:SetIcon (texture, width, height, layout, texcoord, overlay, textdistance, leftpadding, textheight, short_method)
 		if (not self.icon) then
@@ -1053,14 +1065,12 @@ function DF:NewButton (parent, container, name, member, w, h, func, param1, para
 		ButtonObject.container = container
 		ButtonObject.options = {OnGrab = false}
 
-	ButtonObject.button = CreateFrame ("button", name, parent)
+	ButtonObject.button = CreateFrame ("button", name, parent,"BackdropTemplate")
 	DF:Mixin (ButtonObject.button, DF.WidgetFunctions)
 	
 	build_button (ButtonObject.button)
 	
 	ButtonObject.widget = ButtonObject.button
-
-	--ButtonObject.button:SetBackdrop ({bgFile = DF.folder .. "background", tileSize = 64, edgeFile = DF.folder .. "border_2", edgeSize = 10, insets = {left = 1, right = 1, top = 1, bottom = 1}})
 	ButtonObject.button:SetBackdropColor (0, 0, 0, 0.4)
 	ButtonObject.button:SetBackdropBorderColor (1, 1, 1, 1)
 	
