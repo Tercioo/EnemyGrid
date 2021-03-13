@@ -1,4 +1,4 @@
-## Interface: 90001
+## Interface: 90005
 ## Title: Enemy Grid
 ## Notes: Creates a Grid with enemies near you
 ## SavedVariables: EnemyGridDB
