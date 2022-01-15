@@ -22,6 +22,8 @@ local _GetScreenHeight = GetScreenHeight
 local _UIParent = UIParent
 local _CreateFrame = CreateFrame
 
+local PixelUtil = PixelUtil or DFPixelUtil
+
 local version = 2
 
 function DF:CreateCoolTip()
@@ -272,7 +274,7 @@ function DF:CreateCoolTip()
 		--> main frame
 		local frame1
 		if (not GameCooltipFrame1) then
-			frame1 = CreateFrame ("Frame", "GameCooltipFrame1", UIParent,"TooltipBackdropTemplate")
+			frame1 = CreateFrame ("Frame", "GameCooltipFrame1", UIParent, "BackdropTemplate")
 			
 			tinsert (UISpecialFrames, "GameCooltipFrame1")
 			DF:CreateFlashAnimation (frame1)
@@ -300,7 +302,7 @@ function DF:CreateCoolTip()
 		--> secondary frame
 		local frame2
 		if (not GameCooltipFrame2) then
-			frame2 = CreateFrame ("Frame", "GameCooltipFrame2", UIParent,"TooltipBackdropTemplate")
+			frame2 = CreateFrame ("Frame", "GameCooltipFrame2", UIParent,"BackdropTemplate")
 			
 			tinsert (UISpecialFrames, "GameCooltipFrame2")
 			DF:CreateFlashAnimation (frame2)
